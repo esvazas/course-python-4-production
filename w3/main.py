@@ -144,7 +144,7 @@ def main() -> List[Dict]:
     """
 
     st = time.time()
-    n_processes = 3 # you may modify this number - check out multiprocessing.cpu_count() as well
+    n_processes = multiprocessing.cpu_count() # you may modify this number - check out multiprocessing.cpu_count() as well
 
     parser = argparse.ArgumentParser(description="Choose from one of these : [tst|sml|bg]")
     parser.add_argument('--type',
@@ -164,6 +164,12 @@ def main() -> List[Dict]:
     batches = batch_files(file_paths=file_paths, n_processes=n_processes)
 
     ######################################## YOUR CODE HERE ##################################################
+    with multiprocessing.Pool(processes=n_processes)as pool:
+        revenue = pool.starmap(run, [(batch, n_process) for n_process, batch in enumerate(batches)] )
+        revenue = flatten(lst=revenue)
+
+        pool.close()
+        pool.join()
 
     ######################################## YOUR CODE HERE ##################################################
 
@@ -171,7 +177,15 @@ def main() -> List[Dict]:
     print("Overall time taken : {}".format(en-st))
 
     # should return revenue data
-    return [{}]
+    #return [{}]
+    for yearly_data in revenue:
+            with open(os.path.join(output_save_folder, f'{yearly_data["file_name"]}.json'), 'w') as f:
+                f.write(json.dumps(yearly_data))
+
+            plot_sales_data(yearly_revenue=yearly_data['revenue_per_region'], year=yearly_data["file_name"],
+                            plot_save_path=os.path.join(output_save_folder, f'{yearly_data["file_name"]}.png'))
+    
+    return revenue
 
 
 if __name__ == '__main__':

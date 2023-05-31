@@ -144,9 +144,7 @@ def main() -> List[Dict]:
     """
 
     st = time.time()
-    n_processes = 3 # you may modify this number - check out multiprocessing.cpu_count() as well
-
-    print(multiprocessing.cpu_count())
+    n_processes = multiprocessing.cpu_count() # you may modify this number - check out multiprocessing.cpu_count() as well
 
     parser = argparse.ArgumentParser(description="Choose from one of these : [tst|sml|bg]")
     parser.add_argument('--type',
@@ -166,8 +164,6 @@ def main() -> List[Dict]:
     batches = batch_files(file_paths=file_paths, n_processes=n_processes)
 
     ######################################## YOUR CODE HERE ##################################################
-    print(type(batches))
-    print(len(batches))
     with multiprocessing.Pool(processes=n_processes)as pool:
         revenue = pool.starmap(run, [(batch, n_process) for n_process, batch in enumerate(batches)] )
         revenue = flatten(lst=revenue)
